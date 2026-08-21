@@ -1,0 +1,12 @@
+namespace sensors;
+
+table Payload {
+    lat: double;
+    lon: double;
+    alt: double;
+    battery_perc: ubyte;
+    timestamp: ulong;
+    sequence_id: ulong;
+}
+
+root_type Payload;
