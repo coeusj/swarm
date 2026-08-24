@@ -10,6 +10,17 @@ pub struct RingBuffer<T, const SIZE: usize> {
 // and consumer manipulate distinct indices enforced by atomic semantics.
 unsafe impl<T, const SIZE: usize> Sync for RingBuffer<T, SIZE> {}
 
+/// As Writer and Reader pointers wrap (they go back to the first index when the last slot is reached),
+/// it creates ambiguity between FULL and EMPTY state, so a typical ring buffer of physical size N can
+/// only store N - 1 elements.
+///
+/// To not lose 1 slot of capacity, let the atomic indeces increment infinitely
+/// and only apply '% SIZE' when accessing array slots
+///
+/// # Examples
+/// SIZE = 4
+/// reader_idx = 4 -> 4 % 4 = 0 (array index)
+/// writer_idx = 7 -> 7 % 4 = 3 (array index)
 impl<T, const SIZE: usize> RingBuffer<T, SIZE> {
     pub fn new() -> Self {
         Self {
@@ -23,12 +34,6 @@ impl<T, const SIZE: usize> RingBuffer<T, SIZE> {
         let reader_idx = self.reader_idx.load(Ordering::Acquire);
         let writer_idx = self.writer_idx.load(Ordering::Relaxed);
 
-        // To not lose 1 slot of capacity, let the atomic indeces increment infinitely
-        // and only apply '% SIZE' whena accessing array slots
-        // # Examples
-        // SIZE = 4
-        // reader_idx = 4 -> 4 % 4 = 0 (array index)
-        // writer_idx = 7 -> 7 % 4 = 3 (array index)
         let slot_idx = writer_idx % SIZE;
 
         if writer_idx.wrapping_sub(reader_idx) >= SIZE {
@@ -59,12 +64,6 @@ impl<T, const SIZE: usize> RingBuffer<T, SIZE> {
             return None;
         }
 
-        // To not lose 1 slot of capacity, let the atomic indeces increment infinitely
-        // and only apply '% SIZE' whena accessing array slots
-        // # Examples
-        // SIZE = 4
-        // reader_idx = 4 -> 4 % 4 = 0 (array index)
-        // writer_idx = 7 -> 7 % 4 = 3 (array index)
         let slot_idx = reader_idx % SIZE;
 
         let value = unsafe {

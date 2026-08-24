@@ -1,29 +1,22 @@
 use std::time::{SystemTime, UNIX_EPOCH};
-use flatbuffers::FlatBufferBuilder;
+use flatbuffers::{FlatBufferBuilder, WIPOffset};
 
-use crate::fbs::payload_generated::sensors::{Payload, PayloadArgs};
+use crate::fbs::payload_generated::sensors::{Payload, PayloadBuilder};
 
-pub fn create_payload(
+pub fn create_payload<'a>(
+    fb_builder: &mut FlatBufferBuilder<'a>,
     lat: f64,
     lon: f64,
     alt: f64,
     battery_perc: u8
-) -> Vec<u8> {
-    let mut builder = FlatBufferBuilder::with_capacity(1024);
-
-    let payload_offset = Payload::create(
-        &mut builder,
-        &PayloadArgs {
-            lat: lat,
-            lon: lon,
-            alt: alt,
-            battery_perc: battery_perc,
-            timestamp: now_seconds()
-        }
-    );
-
-    builder.finish_size_prefixed(payload_offset, None);
-    builder.finished_data().to_vec()
+) -> WIPOffset<Payload<'a>> {
+    let mut payload = PayloadBuilder::new(fb_builder);
+    payload.add_lat(lat);
+    payload.add_alt(alt);
+    payload.add_lon(lon);
+    payload.add_battery_perc(battery_perc);
+    payload.add_timestamp(now_seconds());
+    payload.finish()
 }
 
 fn now_seconds() -> u64 {
