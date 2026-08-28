@@ -1,6 +1,7 @@
 use std::{io::ErrorKind, net::UdpSocket, time::Duration};
 
-fn main() -> std::io::Result<()> {
+#[tokio::main]
+async fn main() -> Result<(), anyhow::Error> {
     let udp_socket = UdpSocket::bind("127.0.0.1:8080")?;
     let read_timeout = Duration::from_secs(10);
     udp_socket.set_read_timeout(Some(read_timeout))?;

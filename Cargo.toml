@@ -4,9 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.104"
+async-nats = "0.50.0"
 flatbuffers = "25.12.19"
+futures = "0.3.34"
 rand = "0.10.2"
 serde = "1.0.229"
+tokio = { version = "1.53.1", features = ["full"] }
 
 [[bin]]
 name = "bee"
@@ -15,3 +19,11 @@ path = "src/bin/bee.rs"
 [[bin]]
 name = "hive"
 path = "src/bin/hive.rs"
+
+[[bin]]
+name = "pub"
+path = "src/bin/pub.rs"
+
+[[bin]]
+name = "sub"
+path = "src/bin/sub.rs"
