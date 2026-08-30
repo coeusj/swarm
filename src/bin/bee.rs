@@ -1,15 +1,15 @@
 use std::{io, net::UdpSocket, thread, time::Duration};
 use flatbuffers::FlatBufferBuilder;
 use rand::RngExt;
-use swarm::{buffer::{self, RingBuffer}, payload};
+use swarm::{buffer::{self, RingBuffer}, config::AppConfig, payload};
 
 fn main() -> io::Result<()> {
+    let config = AppConfig::load().expect("Could not load configurations");
+
     const BUFFER_SIZE: usize = 10;
     let buffer: RingBuffer<Vec<u8>, BUFFER_SIZE> = buffer::RingBuffer::new();
 
-    let udp_sender_ip = "127.0.0.1:0"; // the port is automatically assigned by the OS
-    let udp_receiver_ip  = "127.0.0.1:8080";
-    let udp_socket = UdpSocket::bind(udp_sender_ip)?;
+    let udp_socket = UdpSocket::bind(config.bee.udp_ip.clone())?;
     println!("Bee flying at: {}", udp_socket.local_addr()?);
 
     let sender = thread::spawn(move || {
@@ -33,7 +33,7 @@ fn main() -> io::Result<()> {
             // Access encoded slice without allocating new memory
             let encoded_bytes: &[u8] = fb_builder.finished_data();
 
-            match udp_socket.send_to(encoded_bytes, udp_receiver_ip) {
+            match udp_socket.send_to(encoded_bytes, config.hive.udp_ip.clone()) {
                 Ok(_) => {
                     println!("Payload sent directly to network ({} bytes)", encoded_bytes.len());
                 }
@@ -43,7 +43,7 @@ fn main() -> io::Result<()> {
                 }
             }
 
-            thread::sleep(Duration::from_millis(1000 / 20)); // 20Hz
+            thread::sleep(Duration::from_millis(1000 / config.bee.update_frequency_hz));
         }
     });
 

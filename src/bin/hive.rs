@@ -2,25 +2,22 @@ use std::time::Duration;
 
 use async_nats::jetstream::{self, stream::StorageType};
 use bytes::Bytes;
-use swarm::nats_config::NatsConfig;
+use swarm::config::AppConfig;
 use tokio::{net::UdpSocket, time::timeout};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let udp_read_timeout = Duration::from_secs(10);
-    let udp_socket = UdpSocket::bind("127.0.0.1:8080").await?;
+    let config = AppConfig::load().expect("Could not load configurations");
+
+    let udp_read_timeout = Duration::from_secs(config.hive.udp_read_timeout_seconds);
+    let udp_socket = UdpSocket::bind(config.hive.udp_ip).await?;
     println!("Hive situated at: {}", udp_socket.local_addr()?);
 
-    let nats_config = NatsConfig {
-        stream_name: String::from("hive"),
-        root_subject: String::from("bees.>"),
-        payload_subject: String::from("bees.payload")
-    };
-    let nats_client = async_nats::connect("127.0.0.1:4222").await?;
+    let nats_client = async_nats::connect(config.nats.server_ip).await?;
     let nats_js = jetstream::new(nats_client);
     nats_js.get_or_create_stream(jetstream::stream::Config {
-        name: nats_config.stream_name.clone(),
-        subjects: vec![nats_config.root_subject],
+        name: config.nats.stream_name.clone(),
+        subjects: vec![config.nats.root_subject],
         storage: StorageType::Memory,
         ..Default::default()
     }).await?;
@@ -39,7 +36,7 @@ async fn main() -> Result<(), anyhow::Error> {
                     // Convert to Bytes (zero-copy allocation where possible) for async NATS publishing
                     let payload = Bytes::copy_from_slice(raw_payload);
 
-                    if let Err(err) = nats_js.publish(nats_config.payload_subject.clone(), payload).await {
+                    if let Err(err) = nats_js.publish(config.nats.payload_subject.clone(), payload).await {
                         eprintln!("Failed to publish to NATS: {err}");
                     }
                 }

@@ -3,13 +3,13 @@ use std::time::Duration;
 use async_nats::jetstream::{self, consumer::PullConsumer, stream::Stream};
 use futures::StreamExt;
 
-use crate::nats_config::NatsConfig;
+use crate::config::NatsConfig;
 
-pub struct ConsumerWorker {
+pub struct NatsConsumer {
     pull_consumer: PullConsumer,
 }
 
-impl ConsumerWorker {
+impl NatsConsumer {
     pub async fn new(config: NatsConfig, nats_stream: Stream) -> Result<Self, anyhow::Error> {
         let consumer = nats_stream
             .get_or_create_consumer(

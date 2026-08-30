@@ -1,0 +1,13 @@
+[nats]
+server_ip = "127.0.0.1:4222"
+stream_name = "swarm"
+root_subject = "bees.>"
+payload_subject = "bees.payload"
+
+[hive]
+udp_ip = "127.0.0.1:8080"
+udp_read_timeout_seconds = 10
+
+[bee]
+udp_ip = "127.0.0.1:0"
+update_frequency_hz = 20
