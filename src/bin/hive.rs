@@ -7,7 +7,7 @@ use tokio::{net::UdpSocket, time::timeout};
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
-    let config = AppConfig::load().expect("Could not load configurations");
+    let config = AppConfig::load().expect("Could not load configuration.");
 
     let udp_read_timeout = Duration::from_secs(config.hive.udp_read_timeout_seconds);
     let udp_socket = UdpSocket::bind(config.hive.udp_ip).await?;

@@ -2,13 +2,13 @@
 
 - `bee`: Simulated device that sends telemetry data to `hive`.
 - `hive`: Ground station that receives telemetry from the `bee` and pushes it to a NATS server.
-- `client`: Client/HMI that reads device telemetry from the NATS server.
+- `beekeeper`: Client/HMI that reads device telemetry from the NATS server.
 
 ### Run Binaries
 
 `bee`
 ```bash
-cargo run --bin bee
+cargo run --bin bee -- id [bee-id]
 ```
 
 `hive`
@@ -16,14 +16,20 @@ cargo run --bin bee
 cargo run --bin hive
 ```
 
-`client`
+`beekeeper`
 ```bash
-cargo run --bin client
+cargo run --bin beekeeper
 ```
 
 ### Configuration
 
 File: `Config.toml`
+
+### Compile FlatBuffers
+
+```bash
+flatc ./src/fbs/payload.fbs --rust
+```
 
 ### Dependencies
 

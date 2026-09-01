@@ -24,11 +24,13 @@ impl<'a> ::flatbuffers::Follow<'a> for Payload<'a> {
 }
 
 impl<'a> Payload<'a> {
-  pub const VT_LAT: ::flatbuffers::VOffsetT = 4;
-  pub const VT_LON: ::flatbuffers::VOffsetT = 6;
-  pub const VT_ALT: ::flatbuffers::VOffsetT = 8;
-  pub const VT_BATTERY_PERC: ::flatbuffers::VOffsetT = 10;
-  pub const VT_TIMESTAMP: ::flatbuffers::VOffsetT = 12;
+  pub const VT_ID: ::flatbuffers::VOffsetT = 4;
+  pub const VT_LAT: ::flatbuffers::VOffsetT = 6;
+  pub const VT_LON: ::flatbuffers::VOffsetT = 8;
+  pub const VT_ALT: ::flatbuffers::VOffsetT = 10;
+  pub const VT_BATTERY_PERC: ::flatbuffers::VOffsetT = 12;
+  pub const VT_TIMESTAMP: ::flatbuffers::VOffsetT = 14;
+  pub const VT_SEQUENCE_NUMBER: ::flatbuffers::VOffsetT = 16;
 
   #[inline]
   pub unsafe fn init_from_table(table: ::flatbuffers::Table<'a>) -> Self {
@@ -40,15 +42,24 @@ impl<'a> Payload<'a> {
     args: &'args PayloadArgs
   ) -> ::flatbuffers::WIPOffset<Payload<'bldr>> {
     let mut builder = PayloadBuilder::new(_fbb);
+    builder.add_sequence_number(args.sequence_number);
     builder.add_timestamp(args.timestamp);
     builder.add_alt(args.alt);
     builder.add_lon(args.lon);
     builder.add_lat(args.lat);
+    builder.add_id(args.id);
     builder.add_battery_perc(args.battery_perc);
     builder.finish()
   }
 
 
+  #[inline]
+  pub fn id(&self) -> u64 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u64>(Payload::VT_ID, Some(0)).unwrap()}
+  }
   #[inline]
   pub fn lat(&self) -> f64 {
     // Safety:
@@ -84,6 +95,13 @@ impl<'a> Payload<'a> {
     // which contains a valid value in this slot
     unsafe { self._tab.get::<u64>(Payload::VT_TIMESTAMP, Some(0)).unwrap()}
   }
+  #[inline]
+  pub fn sequence_number(&self) -> u64 {
+    // Safety:
+    // Created from valid Table for this object
+    // which contains a valid value in this slot
+    unsafe { self._tab.get::<u64>(Payload::VT_SEQUENCE_NUMBER, Some(0)).unwrap()}
+  }
 }
 
 impl ::flatbuffers::Verifiable for Payload<'_> {
@@ -92,31 +110,37 @@ impl ::flatbuffers::Verifiable for Payload<'_> {
     v: &mut ::flatbuffers::Verifier, pos: usize
   ) -> Result<(), ::flatbuffers::InvalidFlatbuffer> {
     v.visit_table(pos)?
+     .visit_field::<u64>("id", Self::VT_ID, false)?
      .visit_field::<f64>("lat", Self::VT_LAT, false)?
      .visit_field::<f64>("lon", Self::VT_LON, false)?
      .visit_field::<f64>("alt", Self::VT_ALT, false)?
      .visit_field::<u8>("battery_perc", Self::VT_BATTERY_PERC, false)?
      .visit_field::<u64>("timestamp", Self::VT_TIMESTAMP, false)?
+     .visit_field::<u64>("sequence_number", Self::VT_SEQUENCE_NUMBER, false)?
      .finish();
     Ok(())
   }
 }
 pub struct PayloadArgs {
+    pub id: u64,
     pub lat: f64,
     pub lon: f64,
     pub alt: f64,
     pub battery_perc: u8,
     pub timestamp: u64,
+    pub sequence_number: u64,
 }
 impl<'a> Default for PayloadArgs {
   #[inline]
   fn default() -> Self {
     PayloadArgs {
+      id: 0,
       lat: 0.0,
       lon: 0.0,
       alt: 0.0,
       battery_perc: 0,
       timestamp: 0,
+      sequence_number: 0,
     }
   }
 }
@@ -126,6 +150,10 @@ pub struct PayloadBuilder<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> {
   start_: ::flatbuffers::WIPOffset<::flatbuffers::TableUnfinishedWIPOffset>,
 }
 impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> PayloadBuilder<'a, 'b, A> {
+  #[inline]
+  pub fn add_id(&mut self, id: u64) {
+    self.fbb_.push_slot::<u64>(Payload::VT_ID, id, 0);
+  }
   #[inline]
   pub fn add_lat(&mut self, lat: f64) {
     self.fbb_.push_slot::<f64>(Payload::VT_LAT, lat, 0.0);
@@ -147,6 +175,10 @@ impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> PayloadBuilder<'a, 'b, A> {
     self.fbb_.push_slot::<u64>(Payload::VT_TIMESTAMP, timestamp, 0);
   }
   #[inline]
+  pub fn add_sequence_number(&mut self, sequence_number: u64) {
+    self.fbb_.push_slot::<u64>(Payload::VT_SEQUENCE_NUMBER, sequence_number, 0);
+  }
+  #[inline]
   pub fn new(_fbb: &'b mut ::flatbuffers::FlatBufferBuilder<'a, A>) -> PayloadBuilder<'a, 'b, A> {
     let start = _fbb.start_table();
     PayloadBuilder {
@@ -164,11 +196,13 @@ impl<'a: 'b, 'b, A: ::flatbuffers::Allocator + 'a> PayloadBuilder<'a, 'b, A> {
 impl ::core::fmt::Debug for Payload<'_> {
   fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
     let mut ds = f.debug_struct("Payload");
+      ds.field("id", &self.id());
       ds.field("lat", &self.lat());
       ds.field("lon", &self.lon());
       ds.field("alt", &self.alt());
       ds.field("battery_perc", &self.battery_perc());
       ds.field("timestamp", &self.timestamp());
+      ds.field("sequence_number", &self.sequence_number());
       ds.finish()
   }
 }

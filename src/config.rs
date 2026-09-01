@@ -1,4 +1,4 @@
-use config::{Config, ConfigError, File};
+use config::{Config, ConfigError, File, FileFormat};
 use serde::Deserialize;
 
 #[derive(Deserialize, Clone)]
@@ -30,9 +30,11 @@ pub struct AppConfig {
 
 impl AppConfig {
     pub fn load() -> Result<Self, ConfigError> {
+        const DEFAULT_CONFIG: &str = include_str!("../Config.toml");
         let builder = Config::builder()
+            .add_source(File::from_str(DEFAULT_CONFIG, FileFormat::Toml))
+            // Optionally override with an external Config.toml
             .add_source(File::with_name("Config").required(false));
-
         let config = builder.build()?;
         config.try_deserialize()
     }

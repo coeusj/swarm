@@ -23,5 +23,5 @@ name = "hive"
 path = "src/bin/hive.rs"
 
 [[bin]]
-name = "client"
-path = "src/bin/client.rs"
+name = "beekeeper"
+path = "src/bin/beekeeper.rs"

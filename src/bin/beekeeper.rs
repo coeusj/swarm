@@ -3,7 +3,7 @@ use swarm::{config::AppConfig, consumer::NatsConsumer};
 
 #[tokio::main]
 pub async fn main() -> Result<(), anyhow::Error> {
-    let config = AppConfig::load().expect("Could not load configurations");
+    let config = AppConfig::load().expect("Could not load configuration.");
 
     let nats_client = async_nats::connect(config.nats.server_ip.clone()).await?;
     let nats_js = jetstream::new(nats_client);
@@ -16,7 +16,7 @@ pub async fn main() -> Result<(), anyhow::Error> {
 
     let consumer = NatsConsumer::new(config.nats, nats_stream).await?;
     let consumer_thread = tokio::spawn(async move {
-        println!("Starting consumer");
+        println!("Beekeeper working");
         consumer.run().await;
     });
     consumer_thread.await?;

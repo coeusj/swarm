@@ -1,12 +1,13 @@
 namespace sensors;
 
 table Payload {
+    id: ulong;
     lat: double;
     lon: double;
     alt: double;
     battery_perc: ubyte;
     timestamp: ulong;
-    sequence_id: ulong;
+    sequence_number: ulong;
 }
 
 root_type Payload;
